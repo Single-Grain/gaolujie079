@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>美国熊猫分布可视化平台</title>
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif; 
+        }
+        #header {
+            height: 60px;
+            background: #3A5F0B;
+            color: #FFF;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(58,95,11,0.2);
+            display: flex;
+            align-items: center;
+        }
+        .header-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-left: 20px;
+            position: relative;
+        }
+        .header-title::after { 
+            content: "🐼";
+            position: absolute;
+            right: -50px;
+            font-size: 32px;
+        }
+        #container {
+            display: flex;
+            height: calc(100% - 120px);
+            background: #F0F4E8; 
+        }
+        #basemapGallery {
+            width: 280px;
+            background: #FFFFFF;
+            padding: 20px;
+            border-right: 2px solid #3A5F0B;
+            box-shadow: 4px 0 8px rgba(58,95,11,0.1);
+        }
+        #viewDiv {
+            flex: 1;
+            position: relative;
+            background: #F8FBF3; 
+        }
+        .basemap-item {
+            cursor: pointer;
+            margin: 12px 0;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.3s;
+            background: #F0F4E8;
+            border: 1px solid #3A5F0B;
+            color: #2C4008;
+        }
+        .basemap-item:hover {
+            background: #DCE8D0;
+            transform: translateX(5px);
+        }
+        .basemap-title {
+            font-size: 18px;
+            color: #3A5F0B;
+            border-bottom: 2px solid;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.32/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.32/"></script>
+</head>
+<body>
+    <div id="header">
+        <h1>美国熊猫分布</h1>
+    </div>
+    <div id="container">
+        <div id="basemapGallery">
+            <h3>底图库</h3>
+            <div class="basemap-item" data-basemap="streets">街道地图</div>
+            <div class="basemap-item" data-basemap="satellite">卫星影像</div>
+            <div class="basemap-item" data-basemap="topo">地形图</div>
+        </div>
+        <div id="viewDiv"></div>
+    </div>
+
+<script>
+require([
+    "esri/Map",
+    "esri/views/MapView",
+    "esri/widgets/ScaleBar",
+    "esri/widgets/Legend",
+    "esri/widgets/Search",
+    "esri/widgets/LayerList",
+    "esri/layers/FeatureLayer"
+], (Map, MapView, ScaleBar, Legend, Search, LayerList, FeatureLayer) => {
+    
+    const map = new Map({
+    basemap: "streets",
+    layers: [
+        new FeatureLayer({
+            url: "https://www.geosceneonline.cn/server/rest/services/美国租借熊猫分布1_MIL1/MapServer/1",
+            title: "美国租界",
+            opacity: 0.7
+        }),
+        new FeatureLayer({
+            url: "https://www.geosceneonline.cn/server/rest/services/美国租借熊猫分布1_MIL1/MapServer/0",
+            title: "熊猫"
+        })
+    ]
+});
+
+    const view = new MapView({
+        container: "viewDiv",
+        map: map,
+        center: [-100, 40],
+        zoom: 4
+    });
+
+    // 添加比例尺
+    const scaleBar = new ScaleBar({
+        view: view,
+        unit: "metric"
+    });
+    view.ui.add(scaleBar, "bottom-left");
+
+    // 添加图例
+    const legend = new Legend({
+        view: view
+    });
+    view.ui.add(legend, "top-left");
+
+    // 添加搜索框
+    const search = new Search({ view });
+    view.ui.add(search, "top-right");
+
+    // 添加图层列表
+    const layerList = new LayerList({ view });
+    view.ui.add(layerList, "top-right");
+
+    // 底图切换功能
+    document.querySelectorAll(".basemap-item").forEach(item => {
+        item.addEventListener("click", () => {
+            map.basemap = item.dataset.basemap;
+        });
+    });
+});
+</script>
+</body>
+</html>
